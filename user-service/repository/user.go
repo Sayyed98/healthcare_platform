@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"hms/user-service/model"
 )
 
@@ -40,4 +42,13 @@ func (r *UserRepository) GetByEmail(email string) (*model.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+func GetUserFromSession(sessionID string) (int64, error) {
+	val, err := RedisClient.Get(context.Background(), sessionID).Result()
+	if err != nil {
+		return 0, errors.New("session not found")
+	}
+
+	// convert string to int64
+	return parseInt64(val), nil
 }
