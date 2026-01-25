@@ -58,9 +58,15 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "login successful"})
 }
 func (h *UserHandler) Me(c *gin.Context) {
-	user, err := h.service.ValidateSession(c)
+	cookie, err := c.Cookie("session_id")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	user, err := h.service.GetCurrentUser(cookie)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid session"})
 		return
 	}
 

@@ -11,6 +11,6 @@ func registerRoutes(r *gin.Engine, h *handler.UserHandler) {
 	{
 		auth.POST("/register", h.Register)
 		auth.POST("/login", h.Login)
-		r.GET("/auth/me", h.Me) // ✅ ADD THIS
+		auth.GET("/me", h.Me) // ✅ ADD THIS
 	}
 }

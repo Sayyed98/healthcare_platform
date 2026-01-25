@@ -5,8 +5,8 @@ import (
 	"hms/user-service/model"
 	"hms/user-service/repository"
 	"hms/user-service/utils"
+	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
@@ -61,20 +61,25 @@ func (s *UserService) Login(req model.LoginRequest) (string, error) {
 	return sessionID, nil
 }
 
-func (s *UserService) ValidateSession(c *gin.Context) (*model.UserResponse, error) {
-	sessionID, err := c.Cookie("session_id")
+func (s *UserService) GetCurrentUser(sessionID string) (*model.UserResponse, error) {
+	userIDStr, err := utils.GetSession(s.redis, sessionID)
 	if err != nil {
-		return nil, errors.New("no session")
+		return nil, err
 	}
 
-	userID, err := utils.GetUserFromSession(sessionID)
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
-		return nil, errors.New("invalid session")
+		return nil, err
+	}
+
+	user, err := s.repo.GetUserByID(userID)
+	if err != nil {
+		return nil, err
 	}
 
 	return &model.UserResponse{
-		ID:    userID,
-		Email: "user@example.com",
-		Role:  "USER",
+		ID:    user.ID,
+		Email: user.Email,
+		Role:  user.Role,
 	}, nil
 }
