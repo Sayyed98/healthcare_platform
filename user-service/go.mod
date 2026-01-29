@@ -8,7 +8,10 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.17.2
 	golang.org/x/crypto v0.47.0
+	hms/proto v0.0.0
 )
+
+replace hms/proto => ../proto
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -40,5 +43,7 @@ require (
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
+	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )

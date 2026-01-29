@@ -5,6 +5,7 @@ import (
 	"hms/user-service/model"
 	"hms/user-service/repository"
 	"hms/user-service/utils"
+	"log"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -55,7 +56,10 @@ func (s *UserService) Login(req model.LoginRequest) (string, error) {
 
 	sessionID := uuid.New().String()
 	if err := utils.CreateSession(s.redis, sessionID, user.ID); err != nil {
+		log.Println("REDIS SESSION CREATE FAILED:", err)
 		return "", err
+	} else {
+		log.Println("SESSION CREATED:", sessionID, "USER:", user.ID)
 	}
 
 	return sessionID, nil
@@ -82,4 +86,8 @@ func (s *UserService) GetCurrentUser(sessionID string) (*model.UserResponse, err
 		Email: user.Email,
 		Role:  user.Role,
 	}, nil
+}
+
+func (s *UserService) Logout(sessionID string) error {
+	return utils.DeleteSession(s.redis, sessionID)
 }

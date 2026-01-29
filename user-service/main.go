@@ -3,16 +3,19 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"hms/user-service/grpc_Server"
+	"hms/user-service/handler"
 	"hms/user-service/repository"
 	"hms/user-service/service"
 	"hms/user-service/utils"
+	"net"
 
-	"hms/user-service/handler"
-
+	pb "hms/proto/auth"
 	"log"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
 )
 
 func initPostgres(cfg *utils.Config) (*sql.DB, error) {
@@ -52,9 +55,25 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 
 	router := gin.Default()
-	registerRoutes(router, userHandler)
+	registerRoutes(router, userHandler, redisClient)
 
-	log.Println("User service running on :8080")
-	router.Run(":8080")
+	// http server
 
+	go func() {
+		log.Println("User service running on :8080")
+		router.Run(":8080")
+	}()
+
+	// grpc server
+	lis, err := net.Listen("tcp", ":9090")
+	if err != nil {
+		log.Fatal("failed to listen:", err)
+	}
+	grpcServer := grpc.NewServer()
+	authServer := grpc_Server.NewAuthServer(redisClient)
+	pb.RegisterAuthServiceServer(grpcServer, authServer)
+	log.Println("gRPC server running on :9090")
+	go grpcServer.Serve(lis)
+
+	select {}
 }

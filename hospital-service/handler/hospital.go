@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"hms/hospital-service/model"
 	"hms/hospital-service/service"
 	"net/http"
@@ -40,6 +41,7 @@ func (h *HospitalHandler) AssignDoctor(c *gin.Context) {
 	}
 
 	cookie := c.Request.Header.Get("Cookie")
+	fmt.Println("cokkie", cookie)
 
 	if err := h.service.AssignDoctor(req, cookie); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

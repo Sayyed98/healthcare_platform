@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"hms/hospital-service/grpc_client"
 	"hms/hospital-service/handler"
+	"hms/hospital-service/middleware"
 	"hms/hospital-service/repository"
 	"hms/hospital-service/service"
 	"hms/hospital-service/utils"
@@ -22,12 +24,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	authClient, err := grpc_client.NewAuthClient("localhost:9090")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	repo := repository.NewHospitalRepository(db)
-	svc := service.NewHospitalService(repo)
+	svc := service.NewHospitalService(repo, authClient)
 	h := handler.NewHospitalHandler(svc)
 
 	r := gin.Default()
-	registerRoutes(r, h)
+	registerRoutes(r, h, middleware.AuthMiddleware(authClient))
 
 	r.Run(":8081")
 }

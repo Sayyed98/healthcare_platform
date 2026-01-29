@@ -2,41 +2,18 @@ package service
 
 import (
 	"errors"
+	"hms/hospital-service/grpc_client"
 	"hms/hospital-service/model"
 	"hms/hospital-service/repository"
-	"net/http"
 )
 
 type HospitalService struct {
-	repo *repository.HospitalRepository
+	repo       *repository.HospitalRepository
+	authClient *grpc_client.AuthClient
 }
 
-func NewHospitalService(repo *repository.HospitalRepository) *HospitalService {
-	return &HospitalService{repo: repo}
-}
-func validateUserSession(cookie string) error {
-	req, err := http.NewRequest(
-		"GET",
-		"http://localhost:8080/auth/me",
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Cookie", cookie)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("unauthorized")
-	}
-
-	return nil
+func NewHospitalService(repo *repository.HospitalRepository, authClient *grpc_client.AuthClient) *HospitalService {
+	return &HospitalService{repo: repo, authClient: authClient}
 }
 
 func (s *HospitalService) CreateHospital(req model.CreateHospitalRequest) (*model.HospitalResponse, error) {
@@ -57,12 +34,6 @@ func (s *HospitalService) CreateHospital(req model.CreateHospitalRequest) (*mode
 
 func (s *HospitalService) AssignDoctor(req model.AssignDoctorRequest, cookie string) error {
 
-	// 🔐 AUTH CHECK
-	if err := validateUserSession(cookie); err != nil {
-		return err
-	}
-
-	// BUSINESS LOGIC
 	doctorID, err := s.repo.FindDoctorByDisease(req.Disease)
 	if err != nil {
 		return errors.New("no doctor found")
