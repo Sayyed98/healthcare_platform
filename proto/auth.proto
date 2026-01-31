@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "proto/auth;authpb";
+
+service AuthService {
+  rpc ValidateSession (ValidateSessionRequest)
+      returns (ValidateSessionResponse);
+}
+
+message ValidateSessionRequest {
+  string session_id = 1;
+}
+
+message ValidateSessionResponse {
+  int64 user_id = 1;
+  string role = 2;
+}
