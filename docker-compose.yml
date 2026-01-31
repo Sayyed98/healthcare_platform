@@ -19,6 +19,41 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+  
+  user-service:
+    build: 
+      context: .
+      dockerfile: user-service/Dockerfile
+    env_file:
+      - .env
+    container_name: user-service
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_ADDR: redis:6379
+
+  hospital-service:
+    build: 
+      context: .
+      dockerfile: hospital-service/Dockerfile
+    env_file:
+      - .env
+    container_name: hospital-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - user-service
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      USER_GRPC_ADDR: user-service:9090
 
 volumes:
   postgres_data:

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"hms/hospital-service/grpc_client"
 	"hms/hospital-service/handler"
@@ -24,7 +25,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	authClient, err := grpc_client.NewAuthClient("localhost:9090")
+	addr := os.Getenv("USER_GRPC_ADDR")
+	authClient, _ := grpc_client.NewAuthClient(addr)
 	if err != nil {
 		log.Fatal(err)
 	}
