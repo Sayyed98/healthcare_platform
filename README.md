@@ -1,2 +1,3 @@
-for running this application you need golang version 1.25.5 and docker,
+for running this application you need golang  and docker,
 after that run 'make up' command for running docker compose file,
+
