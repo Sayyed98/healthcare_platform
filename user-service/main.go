@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hms/user-service/grpc_Server"
 	"hms/user-service/handler"
+	"hms/user-service/middleware"
 	"hms/user-service/repository"
 	"hms/user-service/service"
 	"hms/user-service/utils"
@@ -55,6 +56,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 
 	router := gin.Default()
+	router.Use(middleware.GinLogger())
 	registerRoutes(router, userHandler, redisClient)
 
 	// http server
@@ -69,7 +71,10 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to listen:", err)
 	}
-	grpcServer := grpc.NewServer()
+	// grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(grpc_Server.LoggingInterceptor),
+	)
 	authServer := grpc_Server.NewAuthServer(redisClient)
 	pb.RegisterAuthServiceServer(grpcServer, authServer)
 	log.Println("gRPC server running on :9090")
