@@ -3,6 +3,7 @@ package handler
 import (
 	"hms/user-service/model"
 	"hms/user-service/service"
+	"hms/user-service/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	sessionID, err := h.service.Login(req)
+	sessionID, user, err := h.service.Login(req)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -55,6 +56,13 @@ func (h *UserHandler) Login(c *gin.Context) {
 		true,
 	)
 
+	token, err := utils.GenerateToken(user.ID, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_token": token})
 	c.JSON(http.StatusOK, gin.H{"message": "login successful"})
 }
 func (h *UserHandler) Me(c *gin.Context) {

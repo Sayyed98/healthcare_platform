@@ -14,7 +14,13 @@ func registerRoutes(r *gin.Engine, h *handler.UserHandler, redis *redis.Client) 
 	{
 		auth.POST("/register", h.Register)
 		auth.POST("/login", middleware.RateLimiter(redis, 5, time.Minute), h.Login)
-		auth.GET("/me", h.Me) // ✅ ADD THIS
-		auth.POST("/logout", middleware.AuthMiddleware(redis), h.Logout)
+		auth.GET("/me", h.Me)
+		// Protected routes
+		protected := auth.Group("/")
+		protected.Use(middleware.JWTAuthMiddleware())
+		{
+
+			protected.POST("/logout", h.Logout)
+		}
 	}
 }

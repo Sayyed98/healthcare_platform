@@ -44,25 +44,29 @@ func (s *UserService) Register(req model.RegisterRequest) (*model.UserResponse, 
 	}, nil
 }
 
-func (s *UserService) Login(req model.LoginRequest) (string, error) {
+func (s *UserService) Login(req model.LoginRequest) (string, *model.User, error) {
 	user, err := s.repo.GetByEmail(req.Email)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	if err := utils.CheckPassword(user.PasswordHash, req.Password); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	sessionID := uuid.New().String()
 	if err := utils.CreateSession(s.redis, sessionID, user.ID); err != nil {
 		log.Println("REDIS SESSION CREATE FAILED:", err)
-		return "", err
+		return "", nil, err
 	} else {
 		log.Println("SESSION CREATED:", sessionID, "USER:", user.ID)
 	}
 
-	return sessionID, nil
+	// user, err := s.repo.GetUserByID(userID)
+	// if err != nil {
+	// 	return "", nil, err
+	// }
+	return sessionID, user, nil
 }
 
 func (s *UserService) GetCurrentUser(sessionID string) (*model.UserResponse, error) {
