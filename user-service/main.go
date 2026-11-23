@@ -61,6 +61,24 @@ func main() {
 
 	// http server
 
+	router.GET("/health/startup", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "started",
+		})
+	})
+
+	router.GET("/health/ready", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "ready",
+		})
+	})
+
+	router.GET("/health/live", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "alive",
+		})
+	})
+
 	go func() {
 		log.Println("User service running on :8080")
 		router.Run(":8080")
