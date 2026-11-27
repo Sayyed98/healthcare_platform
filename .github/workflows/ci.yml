@@ -1,0 +1,33 @@
+
+name: HMS CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: user-service/go.mod
+          cache-dependency-path: user-service/go.sum
+
+      - name: Run tests
+        working-directory: user-service
+        run: go test ./...
+
+      - name: Build application
+        working-directory: user-service
+        run: go build ./...
+
