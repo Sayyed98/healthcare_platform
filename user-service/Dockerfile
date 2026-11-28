@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy ONLY what is needed from build context
 COPY proto ./proto
-COPY user-service ./user-service
+COPY . .
 
 WORKDIR /app/user-service
 
